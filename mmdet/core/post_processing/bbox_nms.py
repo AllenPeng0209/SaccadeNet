@@ -1,7 +1,7 @@
 import torch
 
 from mmdet.ops.nms import nms_wrapper
-
+from IPython import embed
 
 def multiclass_nms(multi_bboxes,
                    multi_scores,
@@ -41,9 +41,18 @@ def multiclass_nms(multi_bboxes,
         else:
             _bboxes = multi_bboxes[cls_inds, i * 4:(i + 1) * 4]
         _scores = multi_scores[cls_inds, i]
-        if score_factors is not None:
-            _scores *= score_factors[cls_inds]
-        cls_dets = torch.cat([_bboxes, _scores[:, None]], dim=1)
+        
+        #Do saccade operation in nms_op 
+        if nms_type == 'saccade_nms':
+            _score_factors= score_factors[cls_inds, :]
+            cls_dets = torch.cat([_bboxes, _scores[:, None], _score_factors], dim=1)
+        elif score_factors is not None:
+            _scores *= score_factors[cls_inds,0]       
+            cls_dets = torch.cat([_bboxes, _scores[:, None]], dim=1)
+        else:
+            cls_dets = torch.cat([_bboxes, _scores[:, None]], dim=1)
+
+
         cls_dets, _ = nms_op(cls_dets, **nms_cfg_)
         cls_labels = multi_bboxes.new_full(
             (cls_dets.shape[0], ), i - 1, dtype=torch.long)
@@ -60,5 +69,8 @@ def multiclass_nms(multi_bboxes,
     else:
         bboxes = multi_bboxes.new_zeros((0, 5))
         labels = multi_bboxes.new_zeros((0, ), dtype=torch.long)
-
     return bboxes, labels
+
+
+
+

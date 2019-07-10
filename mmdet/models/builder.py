@@ -1,6 +1,6 @@
 import mmcv
 from torch import nn
-
+from IPython import embed
 from .registry import (BACKBONES, NECKS, ROI_EXTRACTORS, SHARED_HEADS, HEADS,
                        LOSSES, DETECTORS)
 
@@ -11,6 +11,7 @@ def _build_module(cfg, registry, default_args):
     args = cfg.copy()
     obj_type = args.pop('type')
     if mmcv.is_str(obj_type):
+        
         if obj_type not in registry.module_dict:
             raise KeyError('{} is not in the {} registry'.format(
                 obj_type, registry.name))
@@ -25,6 +26,7 @@ def _build_module(cfg, registry, default_args):
 
 
 def build(cfg, registry, default_args=None):
+    
     if isinstance(cfg, list):
         modules = [_build_module(cfg_, registry, default_args) for cfg_ in cfg]
         return nn.Sequential(*modules)
@@ -57,4 +59,5 @@ def build_loss(cfg):
 
 
 def build_detector(cfg, train_cfg=None, test_cfg=None):
+    
     return build(cfg, DETECTORS, dict(train_cfg=train_cfg, test_cfg=test_cfg))

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PYTHON=${PYTHON:-"python"}
+PYTHON=${PYTHON:-"python3"}
 
 echo "Building roi align op..."
 cd mmdet/ops/roi_align
